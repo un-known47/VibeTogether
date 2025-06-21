@@ -32,7 +32,7 @@ const alonePlaylist = [
   "Alone/song2.mp3"
 ];
 const togetherPlaylist = [
-  "Together/song1.mp3",
+  "Together/tum hi aana.mp3",
   "Together/song2.mp3"
 ];
 
