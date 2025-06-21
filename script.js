@@ -33,48 +33,51 @@ const togetherPlaylist = [
   "Together/song2.mp3"
 ];
 
-let selectedPlaylist = [];
-let playlistLoaded = false;
+let currentPlaylist = null;
+let currentTrackIndex = 0;
 
-database.ref("presence").on("value", snapshot => {
-  let usersOnline = 0;
-  if (snapshot.exists()) {
-    usersOnline = snapshot.numChildren();
-  }
-  console.log("Users online:", usersOnline);
+function startPlayback(playlist) {
+  currentPlaylist = playlist;
+  currentTrackIndex = 0;
+  playCurrentTrack();
+}
 
-  if (usersOnline > 1) {
-    statusText.textContent = "Both online! 💕 Playing romantic playlist.";
-    selectedPlaylist = togetherPlaylist;
-  } else {
-    statusText.textContent = "You are alone 😢 Playing alone playlist.";
-    selectedPlaylist = alonePlaylist;
-    sendNotification();
-  }
+function playCurrentTrack() {
+  if (!currentPlaylist) return;
+  audioPlayer.src = currentPlaylist[currentTrackIndex];
+  audioPlayer.play().catch(err => {
+    console.error("Playback failed:", err);
+  });
+}
 
-  if (!playlistLoaded) {
-    playPlaylist(selectedPlaylist);
-    playlistLoaded = true;
-  }
+audioPlayer.addEventListener("ended", () => {
+  currentTrackIndex = (currentTrackIndex + 1) % currentPlaylist.length;
+  playCurrentTrack();
 });
 
-function playPlaylist(playlist) {
-  let current = 0;
-  function playNext() {
-    audioPlayer.src = playlist[current];
-    audioPlayer.play().catch(err => {
-      console.error("Playback failed:", err);
-    });
-    current = (current + 1) % playlist.length;
-  }
-  playNext();
-  audioPlayer.onended = playNext;
+// Initial autoplay trick
+audioPlayer.muted = true;
+setTimeout(() => { audioPlayer.muted = false; }, 500);
 
-  // After small delay unmute (if browser allows)
-  setTimeout(() => {
-    audioPlayer.muted = false;
-  }, 500);
-}
+// Monitor presence changes
+database.ref("presence").on("value", snapshot => {
+  let usersOnline = snapshot.exists() ? snapshot.numChildren() : 0;
+
+  let newPlaylist = (usersOnline > 1) ? togetherPlaylist : alonePlaylist;
+
+  if (newPlaylist !== currentPlaylist) {
+    // Switch playlist instantly if status changes
+    if (usersOnline > 1) {
+      statusText.textContent = "Both online! 💕 Playing romantic playlist.";
+    } else {
+      statusText.textContent = "You are alone 😢 Playing alone playlist.";
+      sendNotification();
+    }
+    startPlayback(newPlaylist);
+  } else {
+    console.log("Presence changed but playlist remains same");
+  }
+});
 
 function sendNotification() {
   if (Notification.permission === "granted") {
