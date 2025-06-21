@@ -38,7 +38,7 @@ const togetherPlaylist = [
 
 // Listen for realtime changes
 onValue(ref(database, 'presence'), (snapshot) => {
-  const usersOnline = snapshot.size;
+  const usersOnline = snapshot.numChildren();
   console.log("Users online:", usersOnline);
 
   if (usersOnline > 1) {
