@@ -22,8 +22,10 @@ presenceRef.set(true).then(() => {
 });
 
 const statusText = document.getElementById("statusText");
-const startBtn = document.getElementById("startBtn");
 const audioPlayer = document.getElementById("audioPlayer");
+
+// Autoplay trick: preload muted first
+audioPlayer.muted = true;
 
 const alonePlaylist = [
   "Alone/song1.mp3",
@@ -51,13 +53,10 @@ database.ref("presence").on("value", snapshot => {
     selectedPlaylist = alonePlaylist;
     sendNotification();
   }
-});
 
-startBtn.addEventListener("click", () => {
+  // Once we know the playlist, start autoplay muted
   if (selectedPlaylist.length > 0) {
     playPlaylist(selectedPlaylist);
-  } else {
-    alert("Waiting for online status...");
   }
 });
 
@@ -65,11 +64,18 @@ function playPlaylist(playlist) {
   let current = 0;
   function playNext() {
     audioPlayer.src = playlist[current];
-    audioPlayer.play();
+    audioPlayer.play().catch(err => {
+      console.error("Autoplay blocked:", err);
+    });
     current = (current + 1) % playlist.length;
   }
   playNext();
   audioPlayer.onended = playNext;
+
+  // After short delay unmute
+  setTimeout(() => {
+    audioPlayer.muted = false;
+  }, 500);
 }
 
 function sendNotification() {
