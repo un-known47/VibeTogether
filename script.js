@@ -5,8 +5,9 @@ import { getDatabase, ref, set, remove, onValue, onDisconnect } from "https://ww
 const firebaseConfig = {
   apiKey: "AIzaSyBjo2d3LYvMYRrnDSwL8dyy9Nx_iPoUOG8",
   authDomain: "vibetogether-af5b4.firebaseapp.com",
+  databaseURL: "https://vibetogether-af5b4-default-rtdb.firebaseio.com",
   projectId: "vibetogether-af5b4",
-  storageBucket: "vibetogether-af5b4.firebasestorage.app",
+  storageBucket: "vibetogether-af5b4.appspot.com",
   messagingSenderId: "138239111562",
   appId: "1:138239111562:web:cedad002736e5b99835873",
   measurementId: "G-DR2BPFF2P2"
