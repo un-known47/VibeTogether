@@ -44,7 +44,9 @@ function startPlayback(playlist) {
 
 function playCurrentTrack() {
   if (!currentPlaylist) return;
+  audioPlayer.pause();  // <-- stop immediately
   audioPlayer.src = currentPlaylist[currentTrackIndex];
+  audioPlayer.load();  // force reload src
   audioPlayer.play().catch(err => {
     console.error("Playback failed:", err);
   });
@@ -55,27 +57,28 @@ audioPlayer.addEventListener("ended", () => {
   playCurrentTrack();
 });
 
-// Initial autoplay trick
+// Autoplay trick
 audioPlayer.muted = true;
+audioPlayer.autoplay = true;
 setTimeout(() => { audioPlayer.muted = false; }, 500);
 
-// Monitor presence changes
+let previousMode = null;
+
 database.ref("presence").on("value", snapshot => {
   let usersOnline = snapshot.exists() ? snapshot.numChildren() : 0;
+  let newMode = (usersOnline > 1) ? "together" : "alone";
 
-  let newPlaylist = (usersOnline > 1) ? togetherPlaylist : alonePlaylist;
+  if (newMode !== previousMode) {
+    previousMode = newMode;
 
-  if (newPlaylist !== currentPlaylist) {
-    // Switch playlist instantly if status changes
-    if (usersOnline > 1) {
+    if (newMode === "together") {
       statusText.textContent = "Both online! 💕 Playing romantic playlist.";
+      startPlayback(togetherPlaylist);
     } else {
       statusText.textContent = "You are alone 😢 Playing alone playlist.";
+      startPlayback(alonePlaylist);
       sendNotification();
     }
-    startPlayback(newPlaylist);
-  } else {
-    console.log("Presence changed but playlist remains same");
   }
 });
 
