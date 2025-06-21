@@ -28,7 +28,7 @@ const audioPlayer = document.getElementById("audioPlayer");
 
 // Playlists
 const alonePlaylist = [
-  "Alone/song1.mp3",
+  "Alone/I'm Tired.mp3",
   "Alone/song2.mp3"
 ];
 const togetherPlaylist = [
