@@ -25,7 +25,7 @@ const statusText = document.getElementById("statusText");
 const audioPlayer = document.getElementById("audioPlayer");
 
 const alonePlaylist = [
-  "Alone/I'm tired.mp3",
+  "Alone/I'm Tired.mp3",
   "Alone/song2.mp3"
 ];
 const togetherPlaylist = [
