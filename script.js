@@ -1,4 +1,4 @@
-// Your config (same as before, fully correct)
+// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyBjo2d3LYvMYRrnDSwL8dyy9Nx_iPoUOG8",
   authDomain: "vibetogether-af5b4.firebaseapp.com",
@@ -14,7 +14,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
-// Presence logic
+// Presence system
 const userId = "user_" + Math.floor(Math.random() * 1000000);
 const presenceRef = database.ref("presence/" + userId);
 presenceRef.set(true).then(() => {
@@ -22,16 +22,19 @@ presenceRef.set(true).then(() => {
 });
 
 const statusText = document.getElementById("statusText");
+const startBtn = document.getElementById("startBtn");
 const audioPlayer = document.getElementById("audioPlayer");
 
 const alonePlaylist = [
-  "Alone/I'm Tired.mp3",
+  "Alone/song1.mp3",
   "Alone/song2.mp3"
 ];
 const togetherPlaylist = [
-  "Together/tum hi aana.mp3",
+  "Together/song1.mp3",
   "Together/song2.mp3"
 ];
+
+let selectedPlaylist = [];
 
 database.ref("presence").on("value", snapshot => {
   let usersOnline = 0;
@@ -42,11 +45,19 @@ database.ref("presence").on("value", snapshot => {
 
   if (usersOnline > 1) {
     statusText.textContent = "Both online! 💕 Playing romantic playlist.";
-    playPlaylist(togetherPlaylist);
+    selectedPlaylist = togetherPlaylist;
   } else {
     statusText.textContent = "You are alone 😢 Playing alone playlist.";
-    playPlaylist(alonePlaylist);
+    selectedPlaylist = alonePlaylist;
     sendNotification();
+  }
+});
+
+startBtn.addEventListener("click", () => {
+  if (selectedPlaylist.length > 0) {
+    playPlaylist(selectedPlaylist);
+  } else {
+    alert("Waiting for online status...");
   }
 });
 
