@@ -1,7 +1,4 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-import { getDatabase, ref, set, remove, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
-
-// Your Firebase config
+// Your config (same as before, fully correct)
 const firebaseConfig = {
   apiKey: "AIzaSyBjo2d3LYvMYRrnDSwL8dyy9Nx_iPoUOG8",
   authDomain: "vibetogether-af5b4.firebaseapp.com",
@@ -14,23 +11,21 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
 
-// Presence system
+// Presence logic
 const userId = "user_" + Math.floor(Math.random() * 1000000);
-const presenceRef = ref(database, 'presence/' + userId);
-set(presenceRef, true).then(() => {
-  onDisconnect(presenceRef).remove();
+const presenceRef = database.ref("presence/" + userId);
+presenceRef.set(true).then(() => {
+  presenceRef.onDisconnect().remove();
 });
 
-// UI elements
 const statusText = document.getElementById("statusText");
 const audioPlayer = document.getElementById("audioPlayer");
 
-// Playlists
 const alonePlaylist = [
-  "Alone/I'm Tired.mp3",
+  "Alone/I'm tired.mp3",
   "Alone/song2.mp3"
 ];
 const togetherPlaylist = [
@@ -38,8 +33,7 @@ const togetherPlaylist = [
   "Together/song2.mp3"
 ];
 
-// Listen for realtime changes
-onValue(ref(database, 'presence'), (snapshot) => {
+database.ref("presence").on("value", snapshot => {
   let usersOnline = 0;
   if (snapshot.exists()) {
     usersOnline = snapshot.numChildren();
@@ -56,7 +50,6 @@ onValue(ref(database, 'presence'), (snapshot) => {
   }
 });
 
-// Play playlist function
 function playPlaylist(playlist) {
   let current = 0;
   function playNext() {
@@ -68,7 +61,6 @@ function playPlaylist(playlist) {
   audioPlayer.onended = playNext;
 }
 
-// Notifications
 function sendNotification() {
   if (Notification.permission === "granted") {
     new Notification("You're listening alone 🎶");
