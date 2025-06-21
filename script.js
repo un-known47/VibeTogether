@@ -19,8 +19,9 @@ const database = getDatabase(app);
 // Presence system
 const userId = "user_" + Math.floor(Math.random() * 1000000);
 const presenceRef = ref(database, 'presence/' + userId);
-await set(presenceRef, true);
-onDisconnect(presenceRef).remove();
+set(presenceRef, true).then(() => {
+  onDisconnect(presenceRef).remove();
+});
 
 // UI elements
 const statusText = document.getElementById("statusText");
