@@ -24,9 +24,6 @@ presenceRef.set(true).then(() => {
 const statusText = document.getElementById("statusText");
 const audioPlayer = document.getElementById("audioPlayer");
 
-// Autoplay trick: preload muted first
-audioPlayer.muted = true;
-
 const alonePlaylist = [
   "Alone/song1.mp3",
   "Alone/song2.mp3"
@@ -37,6 +34,7 @@ const togetherPlaylist = [
 ];
 
 let selectedPlaylist = [];
+let playlistLoaded = false;
 
 database.ref("presence").on("value", snapshot => {
   let usersOnline = 0;
@@ -54,9 +52,9 @@ database.ref("presence").on("value", snapshot => {
     sendNotification();
   }
 
-  // Once we know the playlist, start autoplay muted
-  if (selectedPlaylist.length > 0) {
+  if (!playlistLoaded) {
     playPlaylist(selectedPlaylist);
+    playlistLoaded = true;
   }
 });
 
@@ -65,14 +63,14 @@ function playPlaylist(playlist) {
   function playNext() {
     audioPlayer.src = playlist[current];
     audioPlayer.play().catch(err => {
-      console.error("Autoplay blocked:", err);
+      console.error("Playback failed:", err);
     });
     current = (current + 1) % playlist.length;
   }
   playNext();
   audioPlayer.onended = playNext;
 
-  // After short delay unmute
+  // After small delay unmute (if browser allows)
   setTimeout(() => {
     audioPlayer.muted = false;
   }, 500);
